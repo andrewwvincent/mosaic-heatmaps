@@ -246,18 +246,83 @@ const config = {
         '250k': {
             '1500+': 'rgba(255, 59, 59, 0.4)',         // Bright red
             '1250-1500': 'rgba(255, 149, 5, 0.4)',    // Orange
-            '1000-1250': 'rgba(255, 215, 0, 0.4)',    // Gold/Yellow
-            '750-1000': 'rgba(76, 187, 23, 0.4)',     // Bright green
-            '500-750': 'rgba(0, 120, 255, 0.4)',      // Sky blue
-            '0-500': 'rgba(173, 216, 230, 0.4)'      // Light blue
-        },
-        '500k': {
-            '1500+': 'rgba(102, 0, 153, 0.8)',         // Dark purple
-            '1250-1500': 'rgba(186, 85, 211, 0.8)',   // Medium purple
-            '1000-1250': 'rgba(220, 20, 60, 0.8)',    // Deep red
-            '750-1000': 'rgba(255, 140, 0, 0.8)',     // Dark orange
-            '500-750': 'rgba(255, 215, 0, 0.8)',      // Gold
-            '0-500': 'rgba(255, 255, 224, 0.8)'      // Light yellow
+            '1000-1250': 'rgba(255, 204, 0, 0.4)',    // Yellow
+            '750-1000': 'rgba(122, 184, 0, 0.4)',     // Light green
+            '500-750': 'rgba(0, 166, 0, 0.4)',        // Medium green
+            '250-500': 'rgba(0, 115, 0, 0.4)',        // Dark green
+            '0-250': 'rgba(0, 64, 0, 0.4)'           // Very dark green
         }
-    }
+    },
+    metrics: [
+        {
+            id: "Households",
+            displayName: "Total Households",
+            description: "Total number of households in the area"
+        },
+        {
+            id: "Total_Population",
+            displayName: "Total Population",
+            description: "Total population in the area"
+        },
+        {
+            id: "Mosaic_A",
+            displayName: "Group A - Power Elite",
+            description: "Total households in Mosaic Group A"
+        },
+        {
+            id: "Mosaic_A01",
+            displayName: "Subgroup A01 - American Royalty",
+            description: "Households in Mosaic segment A01"
+        },
+        {
+            id: "Mosaic_A02",
+            displayName: "Subgroup A02 - Platinum Prosperity",
+            description: "Households in Mosaic segment A02"
+        },
+        {
+            id: "Mosaic_A03",
+            displayName: "Subgroup A03 - Kids and Cabernet",
+            description: "Households in Mosaic segment A03"
+        },
+        {
+            id: "Mosaic_A04",
+            displayName: "Subgroup A04 - Picture Perfect Families",
+            description: "Households in Mosaic segment A04"
+        },
+        {
+            id: "Mosaic_A05",
+            displayName: "Subgroup A05 - Couples with Clout",
+            description: "Households in Mosaic segment A05"
+        },
+        {
+            id: "Mosaic_A06",
+            displayName: "Subgroup A06 - Jet Set Urbanites",
+            description: "Households in Mosaic segment A06"
+        },
+        {
+            id: "Median_HH_Income",
+            displayName: "Median Household Income",
+            description: "Median household income in the area"
+        },
+        {
+            id: "Kids_250k",
+            displayName: "Kids in 250k+ HH",
+            description: "Number of children in households with income over $250,000"
+        },
+        {
+            id: "Kids_500k",
+            displayName: "Kids in 500k+ HH",
+            description: "Number of children in households with income over $500,000"
+        },
+        {
+            id: "HH_GT_250k",
+            displayName: "Households > $250k",
+            description: "Number of households with income over $250,000"
+        },
+        {
+            id: "HH_GT_500k",
+            displayName: "Households > $500k",
+            description: "Number of households with income over $500,000"
+        }
+    ]
 };

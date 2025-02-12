@@ -5,103 +5,6 @@ let metricStats = {};
 let kmlData = null;
 let currentLayer = null;
 
-// Metric configurations including display names and default ranges
-const METRIC_CONFIG = {
-    // Population and Households
-    'Total_Population': {
-        displayName: 'Total Population',
-        defaultMin: 0,
-        useMaxAsDefault: true,  // Will use actual maximum from data
-        order: 1
-    },
-    'Households': {
-        displayName: 'Total Households',
-        defaultMin: 0,
-        useMaxAsDefault: true,
-        order: 2
-    },
-    
-    // Power Elite Categories
-    'Mosaic_A': {
-        displayName: 'Power Elite Households',
-        defaultMin: 0,
-        useMaxAsDefault: true,
-        order: 10
-    },
-    
-    // Power Elite Subcategories
-    'Mosaic_A01': {
-        displayName: 'American Royalty Households',
-        defaultMin: 0,
-        useMaxAsDefault: true,
-        order: 20
-    },
-    'Mosaic_A02': {
-        displayName: 'Platinum Prosperity Households',
-        defaultMin: 0,
-        useMaxAsDefault: true,
-        order: 21
-    },
-    'Mosaic_A03': {
-        displayName: 'Kids and Cabernet Households',
-        defaultMin: 0,
-        useMaxAsDefault: true,
-        order: 22
-    },
-    'Mosaic_A04': {
-        displayName: 'Picture Perfect Families Households',
-        defaultMin: 0,
-        useMaxAsDefault: true,
-        order: 23
-    },
-    'Mosaic_A05': {
-        displayName: 'Couples with Clout Households',
-        defaultMin: 0,
-        useMaxAsDefault: true,
-        order: 24
-    },
-    'Mosaic_A06': {
-        displayName: 'Jet Set Urbanites Households',
-        defaultMin: 0,
-        useMaxAsDefault: true,
-        order: 25
-    },
-    
-    // Income Metrics
-    'Median_HH_Income': {
-        displayName: 'Median Household Income',
-        defaultMin: 50000,
-        useMaxAsDefault: true,
-        order: 30
-    },
-    'HH_GT_250k': {
-        displayName: 'Households >$250k',
-        defaultMin: 0,
-        useMaxAsDefault: true,
-        order: 31
-    },
-    'HH_GT_500k': {
-        displayName: 'Households >$500k',
-        defaultMin: 0,
-        useMaxAsDefault: true,
-        order: 32
-    },
-    
-    // Kids in Wealthy Households
-    'Kids_250k': {
-        displayName: 'Kids in $250k+ Households',
-        defaultMin: 0,
-        useMaxAsDefault: true,
-        order: 40
-    },
-    'Kids_500k': {
-        displayName: 'Kids in $500k+ Households',
-        defaultMin: 0,
-        useMaxAsDefault: true,
-        order: 41
-    }
-};
-
 // Store custom ranges for metrics
 const customRanges = new Map();
 
@@ -162,17 +65,82 @@ async function loadAvailableCities() {
     const citySelector = document.getElementById('city-selector');
     citySelector.innerHTML = '';
     
-    // In a real app, this would be loaded from the server
-    const cities = ['Austin', 'Boston'];
+    // Get cities from config.js
+    const cities = config.polygonLayers.map(layer => {
+        const cityName = layer.file.split('/').pop().replace('.kml', '');
+        return {
+            name: layer.name,
+            value: cityName
+        };
+    });
     
+    // Sort cities alphabetically by display name
+    cities.sort((a, b) => a.name.localeCompare(b.name));
+    
+    // Add options to selector
     cities.forEach(city => {
         const option = document.createElement('option');
-        option.value = city;
-        option.textContent = city;
+        option.value = city.value;
+        option.textContent = city.name;
         citySelector.appendChild(option);
     });
     
-    return cities;
+    return cities.map(city => city.value);
+}
+
+async function loadCity(cityName) {
+    try {
+        currentCity = cityName;
+        
+        // Remove existing layer if present
+        if (currentLayer && map.getLayer(currentLayer)) {
+            map.removeLayer(currentLayer);
+            map.removeSource(currentLayer);
+        }
+        
+        // Load KML data
+        const response = await fetch(`data/KMLs/${cityName}.kml`);
+        if (!response.ok) {
+            console.warn(`KML not found for ${cityName}, skipping...`);
+            return;
+        }
+        
+        const kmlText = await response.text();
+        const parser = new DOMParser();
+        kmlData = parser.parseFromString(kmlText, 'text/xml');
+        
+        // Convert to GeoJSON
+        const geojson = kmlToGeoJSON(kmlData);
+        
+        // Add source
+        const sourceId = `${cityName}-source`;
+        currentLayer = sourceId;
+        
+        if (map.getSource(sourceId)) {
+            map.removeSource(sourceId);
+        }
+        
+        map.addSource(sourceId, {
+            type: 'geojson',
+            data: geojson
+        });
+        
+        // Extract available metrics
+        updateMetricsList();
+        
+        // Update map view
+        const bounds = calculateBounds(kmlData);
+        if (bounds) {
+            map.fitBounds(bounds, { padding: 50 });
+        }
+        
+        // Display initial metric
+        if (currentMetric) {
+            displayMetric(currentMetric);
+        }
+    } catch (error) {
+        console.error(`Error loading city ${cityName}:`, error);
+    }
 }
 
 function kmlToGeoJSON(kmlData) {
@@ -220,85 +188,40 @@ function kmlToGeoJSON(kmlData) {
     };
 }
 
-async function loadCity(cityName) {
-    currentCity = cityName;
-    
-    // Remove existing layer if present
-    if (currentLayer && map.getLayer(currentLayer)) {
-        map.removeLayer(currentLayer);
-        map.removeSource(currentLayer);
-    }
-    
-    // Load KML data
-    const response = await fetch(`data/KMLs/${cityName}.kml`);
-    const kmlText = await response.text();
-    const parser = new DOMParser();
-    kmlData = parser.parseFromString(kmlText, 'text/xml');
-    
-    // Convert to GeoJSON
-    const geojson = kmlToGeoJSON(kmlData);
-    
-    // Add source
-    const sourceId = `${cityName}-source`;
-    currentLayer = sourceId;
-    
-    if (map.getSource(sourceId)) {
-        map.removeSource(sourceId);
-    }
-    
-    map.addSource(sourceId, {
-        type: 'geojson',
-        data: geojson
-    });
-    
-    // Extract available metrics
-    updateMetricsList();
-    
-    // Update map view
-    const bounds = calculateBounds(kmlData);
-    map.fitBounds(bounds, { padding: 50 });
-    
-    // Display initial metric
-    if (currentMetric) {
-        displayMetric(currentMetric);
-    }
-}
-
 function updateMetricsList() {
     const metricSelector = document.getElementById('metric-selector');
     metricSelector.innerHTML = '';
     
     // Get all available metrics from the KML that are in our config
-    const metrics = new Set();
+    const availableMetrics = new Set();
     const placemarks = kmlData.getElementsByTagName('Placemark');
     if (placemarks.length > 0) {
         const dataElements = placemarks[0].getElementsByTagName('data');
         for (const elem of dataElements) {
             const metricName = elem.getAttribute('name');
-            if (METRIC_CONFIG[metricName]) {
-                metrics.add(metricName);
+            // Check if this metric is in our config
+            if (config.metrics.some(m => m.id === metricName)) {
+                availableMetrics.add(metricName);
             }
         }
     }
     
-    // Sort metrics by their order in the config
-    const sortedMetrics = Array.from(metrics).sort((a, b) => 
-        METRIC_CONFIG[a].order - METRIC_CONFIG[b].order
-    );
+    // Get configured metrics that are available in the data
+    const configuredMetrics = config.metrics.filter(m => availableMetrics.has(m.id));
     
     // Add options to selector
-    sortedMetrics.forEach(metric => {
+    configuredMetrics.forEach(metric => {
         const option = document.createElement('option');
-        option.value = metric;
-        option.textContent = METRIC_CONFIG[metric].displayName;
+        option.value = metric.id;
+        option.textContent = metric.displayName;
+        option.title = metric.description; // Add tooltip with description
         metricSelector.appendChild(option);
     });
     
     // Select first metric by default
-    if (metrics.size > 0 && !currentMetric) {
-        currentMetric = sortedMetrics[0];
+    if (configuredMetrics.length > 0 && !currentMetric) {
+        currentMetric = configuredMetrics[0].id;
         metricSelector.value = currentMetric;
-        loadMetricRanges(currentMetric);
         displayMetric(currentMetric);
     }
 }
@@ -330,15 +253,17 @@ function calculateMetricStats(metric) {
         median: values[Math.floor(values.length / 2)]
     };
     
-    // Store max value for this metric
-    metricMaxValues.set(metric, stats.max);
+    // Store stats for this metric
+    metricStats[metric] = stats;
     
     return stats;
 }
 
 function loadMetricRanges(metric) {
-    const config = METRIC_CONFIG[metric];
-    let min, max;
+    const stats = metricStats[metric];
+    if (!stats) return [0, 100]; // Fallback if no stats available
+    
+    let min = 0, max = stats.max;
     
     // Check URL parameters first
     const params = new URLSearchParams(window.location.search);
@@ -348,50 +273,45 @@ function loadMetricRanges(metric) {
     } else if (customRanges.has(metric)) {
         // Then check custom ranges
         [min, max] = customRanges.get(metric);
-    } else {
-        // Fall back to defaults
-        min = config.defaultMin;
-        
-        // Use actual maximum if specified
-        if (config.useMaxAsDefault && metricMaxValues.has(metric)) {
-            max = metricMaxValues.get(metric);
-            console.log(`Using actual max for ${metric}: ${max}`); // Debug log
-        } else {
-            max = config.defaultMax || 100;
-            console.log(`Using default max for ${metric}: ${max}`); // Debug log
-        }
     }
     
-    // Update input fields
+    // Update range inputs
     document.getElementById('min-value').value = min;
     document.getElementById('max-value').value = max;
+    
+    return [min, max];
 }
 
 function saveMetricRanges(metric) {
     const min = parseFloat(document.getElementById('min-value').value);
     const max = parseFloat(document.getElementById('max-value').value);
     
-    // Save to custom ranges
+    // Store custom range
     customRanges.set(metric, [min, max]);
     
     // Update URL if different from defaults
-    const config = METRIC_CONFIG[metric];
+    const stats = metricStats[metric];
     const params = new URLSearchParams(window.location.search);
     const paramKey = `${metric}_range`;
     
-    const defaultMax = config.useMaxAsDefault && metricMaxValues.has(metric) 
-        ? metricMaxValues.get(metric) 
-        : (config.defaultMax || 100);
+    // Only add to URL if different from defaults
+    const defaultMin = 0;
+    const defaultMax = stats?.max || 100;
     
-    if (min !== config.defaultMin || max !== defaultMax) {
+    if (min !== defaultMin || max !== defaultMax) {
         params.set(paramKey, `${min},${max}`);
     } else {
         params.delete(paramKey);
     }
     
-    // Update URL without reloading the page
-    const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
-    window.history.pushState({}, '', newUrl);
+    // Update URL without reloading
+    const newUrl = `${window.location.pathname}?${params.toString()}`;
+    window.history.replaceState({}, '', newUrl);
+    
+    // Update display
+    displayMetric(metric);
+    
+    return [min, max];
 }
 
 function displayMetric(metric) {
