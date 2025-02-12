@@ -34,5 +34,4 @@ jspm_packages/
 .yarn-integrity
 
 # Data processing directories
-data/lat long analysis/
-data/demographics/
+

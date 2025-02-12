@@ -843,3 +843,135 @@ body {
     color: white;
     border-color: #45a049;
 }
+
+/* Metric Selector */
+.metric-selector {
+    margin: 15px 0;
+}
+
+.metric-selector h3 {
+    margin: 0 0 8px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.metric-dropdown {
+    width: 100%;
+    padding: 8px;
+    font-size: 14px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+/* Color Range Controls */
+.color-range-controls {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.color-range-controls h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.range-row {
+    display: flex;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.range-row label {
+    flex: 0 0 100px;
+    font-size: 14px;
+    color: #666;
+}
+
+.range-input {
+    flex: 1;
+    padding: 6px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+}
+
+.color-gradient {
+    margin: 15px 0;
+    padding: 10px 0;
+    position: relative;
+}
+
+.gradient-preview {
+    height: 20px;
+    border-radius: 4px;
+    background: linear-gradient(to right, #0000ff99, #ff000099);
+}
+
+.gradient-min,
+.gradient-max {
+    position: absolute;
+    bottom: -5px;
+    font-size: 12px;
+    color: #666;
+}
+
+.gradient-min {
+    left: 0;
+}
+
+.gradient-max {
+    right: 0;
+}
+
+.apply-button {
+    width: 100%;
+    padding: 8px;
+    background: #4CAF50;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    margin-top: 10px;
+}
+
+.apply-button:hover {
+    background: #45a049;
+}
+
+/* Stats Display */
+.stats-container {
+    margin: 20px 0;
+    padding: 15px;
+    background: #f8f9fa;
+    border-radius: 4px;
+}
+
+.stats-container h3 {
+    margin: 0 0 15px 0;
+    font-size: 16px;
+    color: #333;
+}
+
+.stats-table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.stats-table td {
+    padding: 8px;
+    border-bottom: 1px solid #eee;
+    font-size: 14px;
+}
+
+.stats-table td:first-child {
+    color: #666;
+    width: 100px;
+}
+
+.stats-table td:last-child {
+    text-align: right;
+    font-weight: 500;
+}
