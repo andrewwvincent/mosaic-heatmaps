@@ -188,8 +188,6 @@ function kmlToGeoJSON(kmlData) {
 }
 
 function updateMetricsList() {
-    if (!kmlData) return;
-    
     const metricSelect = document.getElementById('metric-select');
     if (!metricSelect) {
         console.warn('Metric selector not found');
@@ -198,23 +196,11 @@ function updateMetricsList() {
     
     metricSelect.innerHTML = '';
     
-    // Get all unique data names from the KML
-    const metrics = new Set();
-    const placemarks = kmlData.getElementsByTagName('Placemark');
-    
-    // Loop through each placemark to find all unique data names
-    for (const placemark of placemarks) {
-        const dataElements = placemark.getElementsByTagName('data');
-        for (const data of dataElements) {
-            const name = data.getAttribute('name');
-            if (name) {
-                metrics.add(name);
-            }
-        }
-    }
+    // Get metrics from config in original order
+    const metrics = Object.keys(config.metrics);
     
     // Add metrics to selector
-    Array.from(metrics).sort().forEach(metric => {
+    metrics.forEach(metric => {
         const option = document.createElement('option');
         option.value = metric;
         option.textContent = metric;
@@ -250,9 +236,27 @@ function displayMetric(metric) {
     
     if (values.length === 0) return;
     
-    // Calculate min and max
-    const min = Math.min(...values);
-    const max = Math.max(...values);
+    // Calculate statistics
+    values.sort((a, b) => a - b); // Sort for median calculation
+    const stats = {
+        min: values[0],
+        max: values[values.length - 1],
+        mean: values.reduce((sum, val) => sum + val, 0) / values.length,
+        median: values.length % 2 === 0 
+            ? (values[values.length/2 - 1] + values[values.length/2]) / 2
+            : values[Math.floor(values.length/2)]
+    };
+    
+    // Update statistics display
+    const minElement = document.getElementById('current-min');
+    const maxElement = document.getElementById('current-max');
+    const meanElement = document.getElementById('current-mean');
+    const medianElement = document.getElementById('current-median');
+    
+    if (minElement) minElement.textContent = stats.min.toLocaleString(undefined, {maximumFractionDigits: 2});
+    if (maxElement) maxElement.textContent = stats.max.toLocaleString(undefined, {maximumFractionDigits: 2});
+    if (meanElement) meanElement.textContent = stats.mean.toLocaleString(undefined, {maximumFractionDigits: 2});
+    if (medianElement) medianElement.textContent = stats.median.toLocaleString(undefined, {maximumFractionDigits: 2});
     
     // Create color scale
     const colorScale = config.heatmap.colors;
@@ -260,7 +264,7 @@ function displayMetric(metric) {
     
     // Create color stops
     for (let i = 0; i < colorScale.length; i++) {
-        const value = min + (i / (colorScale.length - 1)) * (max - min);
+        const value = stats.min + (i / (colorScale.length - 1)) * (stats.max - stats.min);
         steps.push(value);
         steps.push(colorScale[i]);
     }

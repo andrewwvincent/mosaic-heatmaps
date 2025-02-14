@@ -66,5 +66,130 @@ const config = {
             'rgba(128, 0, 128, 0.5)'  // purple
         ],
         defaultOpacity: 0.5
+    },
+    
+    // Metrics configuration
+    metrics: {
+        "Total Households": {
+            basis: "households"
+        },
+        "HH - A Calc": {
+            basis: "households"
+        },
+        "HH - B Calc": {
+            basis: "households"
+        },
+        "Households (Mosaic Data)": {
+            basis: "households"
+        },
+        "Households >$250k": {
+            basis: "wealthy_households"
+        },
+        "HH >$250K - A Calc": {
+            basis: "wealthy_households"
+        },
+        "HH >$250K - B Calc": {
+            basis: "wealthy_households"
+        },
+        "HH >$250K - A01 Calc": {   
+            basis: "wealthy_households"
+        },
+        "HH >$250K - A02 Calc": {
+            basis: "wealthy_households"
+        },
+        "HH >$250K - A03 Calc": {
+            basis: "wealthy_households"
+        },
+        "HH >$250K - A04 Calc": {
+            basis: "wealthy_households"
+        },
+        "HH >$250K - A05 Calc": {
+            basis: "wealthy_households"
+        },
+        "HH >$250K - A06 Calc": {
+            basis: "wealthy_households"
+        },
+        "HH >$250k - B07 Calc": {
+            basis: "wealthy_households"
+        },
+        "HH >$250k - B08 Calc": {
+            basis: "wealthy_households"
+        },
+        "HH >$250k - B09 Calc": {
+            basis: "wealthy_households"
+        },
+        "HH >$250k - B10 Calc": {
+            basis: "wealthy_households"
+        },
+        "Kids 5-14": {
+            basis: "kids"
+        },
+        "Kids 5-17": {
+            basis: "kids"
+        },
+        "Kids 4-18 - A Calc": {
+            basis: "kids"
+        },
+        "Kids 4-18 - B Calc": {
+            basis: "kids"
+        },
+        "Kids 5-14 >$250k": {
+            basis: "wealthy_kids"
+        },
+        "Kids 5-17 >$250k": {
+            basis: "wealthy_kids"
+        },
+        "Kids 4-18 >$250k - A Calc": {
+            basis: "wealthy_kids"
+        },
+        "Kids 4-18 >$250k - B Calc": {
+            basis: "wealthy_kids"
+        },
+        "Kids 4-18 >$250k - A01 Calc": {
+            basis: "wealthy_kids"
+        },
+        "Kids 4-18 >$250k - A02 Calc": {
+            basis: "wealthy_kids"
+        },
+        "Kids 4-18 >$250k - A03 Calc": {
+            basis: "wealthy_kids"
+        },
+        "Kids 4-18 >$250k - A04 Calc": {
+            basis: "wealthy_kids"
+        },
+        "Kids 4-18 >$250k - A05 Calc": {
+            basis: "wealthy_kids"
+        },
+        "Kids 4-18 >$250k - A06 Calc": {
+            basis: "wealthy_kids"
+        },
+        "Kids 4-18 >$250k - B07 Calc": {
+            basis: "wealthy_kids"
+        },
+        "Kids 4-18 >$250k - B08 Calc": {
+            basis: "wealthy_kids"
+        },
+        "Kids 4-18 >$250k - B09 Calc": {
+            basis: "wealthy_kids"
+        },
+        "Kids 4-18 >$250k - B10 Calc": {
+            basis: "wealthy_kids"
+        },
+        "Average (Mean) Travel Time: Worked Away from Home": {
+            basis: "time"
+        },
+        "Average Elementary and high school tuitions": {
+            basis: "tuition"
+        },
+        "Average (Mean) Household Size": {
+            basis: "household_size"
+        },
+        "Average (Mean) Household Income": {
+            basis: "household_income"
+        },
+        "Mdian Household Income": {
+            basis: "household_income"
+        }
+        // You can add more metrics here with their basis values
     }
 };
