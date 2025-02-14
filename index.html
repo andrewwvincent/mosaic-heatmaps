@@ -7,6 +7,43 @@
     <link href='https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css' rel='stylesheet' />
     <link href="https://api.mapbox.com/mapbox-gl-js/plugins/mapbox-gl-geocoder/v5.0.0/mapbox-gl-geocoder.css" type="text/css" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <style>
+        .filter-section {
+            margin: 20px 0;
+            padding: 10px;
+            background: #f5f5f5;
+            border-radius: 5px;
+        }
+
+        .filter-section h3 {
+            margin: 0 0 10px 0;
+            font-size: 1em;
+        }
+
+        .range-inputs {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .input-group label {
+            font-size: 0.9em;
+            color: #666;
+        }
+
+        .input-group input[type="number"] {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            width: 100%;
+        }
+    </style>
 </head>
 <body>
     <div class="container">
@@ -25,9 +62,9 @@
                 </div>
 
                 <!-- Metric Selector -->
-                <div class="metric-selector">
-                    <h3>Select Metric</h3>
-                    <select id="metric-selector" class="metric-dropdown">
+                <div class="metric-section">
+                    <h3>Metric</h3>
+                    <select id="metric-select" class="metric-dropdown">
                         <!-- Will be populated dynamically -->
                     </select>
                 </div>
@@ -49,6 +86,17 @@
                         <span class="gradient-max">Max</span>
                     </div>
                     <button id="apply-range" class="apply-button">Apply Range</button>
+                </div>
+
+                <!-- Comparison Mode -->
+                <div class="comparison-mode">
+                    <label class="comparison-checkbox">
+                        <input type="checkbox" id="comparison-mode">
+                        Comparison Mode
+                    </label>
+                    <div class="comparison-info">
+                        Uses fixed ranges for comparing similar metrics
+                    </div>
                 </div>
 
                 <!-- Stats Display -->
@@ -92,6 +140,20 @@
                             <input type="checkbox" id="family-locations">
                             <label for="family-locations">Family Locations</label>
                             <button id="family-labels-toggle" class="label-toggle">Labels Off</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="filter-section">
+                    <h3>Tuition Filter</h3>
+                    <div class="range-inputs">
+                        <div class="input-group">
+                            <label for="minTuition">Min Tuition ($)</label>
+                            <input type="number" id="minTuition" value="30000" min="0" step="1000">
+                        </div>
+                        <div class="input-group">
+                            <label for="maxTuition">Max Tuition ($)</label>
+                            <input type="number" id="maxTuition" min="0" step="1000">
                         </div>
                     </div>
                 </div>

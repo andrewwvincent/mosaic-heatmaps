@@ -257,72 +257,108 @@ const config = {
         {
             id: "Households",
             displayName: "Total Households",
-            description: "Total number of households in the area"
+            description: "Total number of households in the area",
+            fundamentalMetric: "households"
         },
         {
             id: "Total_Population",
             displayName: "Total Population",
-            description: "Total population in the area"
+            description: "Total population in the area",
+            fundamentalMetric: "population"
         },
         {
             id: "Mosaic_A",
             displayName: "Group A - Power Elite",
-            description: "Total households in Mosaic Group A"
+            description: "Total households in Mosaic Group A",
+            fundamentalMetric: "households"
         },
         {
             id: "Mosaic_A01",
             displayName: "Subgroup A01 - American Royalty",
-            description: "Households in Mosaic segment A01"
+            description: "Households in Mosaic segment A01",
+            fundamentalMetric: "households"
         },
         {
             id: "Mosaic_A02",
             displayName: "Subgroup A02 - Platinum Prosperity",
-            description: "Households in Mosaic segment A02"
+            description: "Households in Mosaic segment A02",
+            fundamentalMetric: "households"
         },
         {
             id: "Mosaic_A03",
             displayName: "Subgroup A03 - Kids and Cabernet",
-            description: "Households in Mosaic segment A03"
+            description: "Households in Mosaic segment A03",
+            fundamentalMetric: "households"
         },
         {
             id: "Mosaic_A04",
             displayName: "Subgroup A04 - Picture Perfect Families",
-            description: "Households in Mosaic segment A04"
+            description: "Households in Mosaic segment A04",
+            fundamentalMetric: "households"
         },
         {
             id: "Mosaic_A05",
             displayName: "Subgroup A05 - Couples with Clout",
-            description: "Households in Mosaic segment A05"
+            description: "Households in Mosaic segment A05",
+            fundamentalMetric: "households"
         },
         {
             id: "Mosaic_A06",
             displayName: "Subgroup A06 - Jet Set Urbanites",
-            description: "Households in Mosaic segment A06"
+            description: "Households in Mosaic segment A06",
+            fundamentalMetric: "households"
         },
         {
             id: "Median_HH_Income",
             displayName: "Median Household Income",
-            description: "Median household income in the area"
+            description: "Median household income in the area",
+            fundamentalMetric: "income"
         },
         {
             id: "Kids_250k",
             displayName: "Kids in 250k+ HH",
-            description: "Number of children in households with income over $250,000"
+            description: "Number of children in households with income over $250,000",
+            fundamentalMetric: "kids"
         },
         {
             id: "Kids_500k",
             displayName: "Kids in 500k+ HH",
-            description: "Number of children in households with income over $500,000"
+            description: "Number of children in households with income over $500,000",
+            fundamentalMetric: "kids"
         },
         {
             id: "HH_GT_250k",
             displayName: "Households > $250k",
-            description: "Number of households with income over $250,000"
+            description: "Number of households with income over $250,000",
+            fundamentalMetric: "households"
         },
         {
             id: "HH_GT_500k",
             displayName: "Households > $500k",
-            description: "Number of households with income over $500,000"
+            description: "Number of households with income over $500,000",
+            fundamentalMetric: "households"
         }
-    ]
+    ],
+    comparisonValues: {
+        households: {
+            min: 0,
+            max: 5000,
+            description: "Number of households in an area"
+        },
+        population: {
+            min: 0,
+            max: 15000,
+            description: "Total population in an area"
+        },
+        income: {
+            min: 50000,
+            max: 500000,
+            description: "Household income in dollars"
+        },
+        kids: {
+            min: 0,
+            max: 2000,
+            description: "Number of children in an area"
+        }
+    }
 };

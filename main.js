@@ -4,6 +4,104 @@ let currentMetric = null;
 let metricStats = {};
 let kmlData = null;
 let currentLayer = null;
+let schoolsLayer = 'schools-layer';
+
+// Metric configurations including display names and default ranges
+const METRIC_CONFIG = {
+    // Population and Households
+    'Total_Population': {
+        displayName: 'Total Population',
+        defaultMin: 0,
+        useMaxAsDefault: true,  // Will use actual maximum from data
+        order: 1
+    },
+    'Households': {
+        displayName: 'Total Households',
+        defaultMin: 0,
+        useMaxAsDefault: true,
+        order: 2
+    },
+    
+    // Power Elite Categories
+    'Mosaic_A': {
+        displayName: 'Power Elite Households',
+        defaultMin: 0,
+        useMaxAsDefault: true,
+        order: 10
+    },
+    
+    // Power Elite Subcategories
+    'Mosaic_A01': {
+        displayName: 'American Royalty Households',
+        defaultMin: 0,
+        useMaxAsDefault: true,
+        order: 20
+    },
+    'Mosaic_A02': {
+        displayName: 'Platinum Prosperity Households',
+        defaultMin: 0,
+        useMaxAsDefault: true,
+        order: 21
+    },
+    'Mosaic_A03': {
+        displayName: 'Kids and Cabernet Households',
+        defaultMin: 0,
+        useMaxAsDefault: true,
+        order: 22
+    },
+    'Mosaic_A04': {
+        displayName: 'Picture Perfect Families Households',
+        defaultMin: 0,
+        useMaxAsDefault: true,
+        order: 23
+    },
+    'Mosaic_A05': {
+        displayName: 'Couples with Clout Households',
+        defaultMin: 0,
+        useMaxAsDefault: true,
+        order: 24
+    },
+    'Mosaic_A06': {
+        displayName: 'Jet Set Urbanites Households',
+        defaultMin: 0,
+        useMaxAsDefault: true,
+        order: 25
+    },
+    
+    // Income Metrics
+    'Median_HH_Income': {
+        displayName: 'Median Household Income',
+        defaultMin: 50000,
+        useMaxAsDefault: true,
+        order: 30
+    },
+    'HH_GT_250k': {
+        displayName: 'Households >$250k',
+        defaultMin: 0,
+        useMaxAsDefault: true,
+        order: 31
+    },
+    'HH_GT_500k': {
+        displayName: 'Households >$500k',
+        defaultMin: 0,
+        useMaxAsDefault: true,
+        order: 32
+    },
+    
+    // Kids in Wealthy Households
+    'Kids_250k': {
+        displayName: 'Kids in $250k+ Households',
+        defaultMin: 0,
+        useMaxAsDefault: true,
+        order: 40
+    },
+    'Kids_500k': {
+        displayName: 'Kids in $500k+ Households',
+        defaultMin: 0,
+        useMaxAsDefault: true,
+        order: 41
+    }
+};
 
 // Store custom ranges for metrics
 const customRanges = new Map();
@@ -65,82 +163,17 @@ async function loadAvailableCities() {
     const citySelector = document.getElementById('city-selector');
     citySelector.innerHTML = '';
     
-    // Get cities from config.js
-    const cities = config.polygonLayers.map(layer => {
-        const cityName = layer.file.split('/').pop().replace('.kml', '');
-        return {
-            name: layer.name,
-            value: cityName
-        };
-    });
+    // In a real app, this would be loaded from the server
+    const cities = ['Austin', 'Boston'];
     
-    // Sort cities alphabetically by display name
-    cities.sort((a, b) => a.name.localeCompare(b.name));
-    
-    // Add options to selector
     cities.forEach(city => {
         const option = document.createElement('option');
-        option.value = city.value;
-        option.textContent = city.name;
+        option.value = city;
+        option.textContent = city;
         citySelector.appendChild(option);
     });
     
-    return cities.map(city => city.value);
-}
-
-async function loadCity(cityName) {
-    try {
-        currentCity = cityName;
-        
-        // Remove existing layer if present
-        if (currentLayer && map.getLayer(currentLayer)) {
-            map.removeLayer(currentLayer);
-            map.removeSource(currentLayer);
-        }
-        
-        // Load KML data
-        const response = await fetch(`data/KMLs/${cityName}.kml`);
-        if (!response.ok) {
-            console.warn(`KML not found for ${cityName}, skipping...`);
-            return;
-        }
-        
-        const kmlText = await response.text();
-        const parser = new DOMParser();
-        kmlData = parser.parseFromString(kmlText, 'text/xml');
-        
-        // Convert to GeoJSON
-        const geojson = kmlToGeoJSON(kmlData);
-        
-        // Add source
-        const sourceId = `${cityName}-source`;
-        currentLayer = sourceId;
-        
-        if (map.getSource(sourceId)) {
-            map.removeSource(sourceId);
-        }
-        
-        map.addSource(sourceId, {
-            type: 'geojson',
-            data: geojson
-        });
-        
-        // Extract available metrics
-        updateMetricsList();
-        
-        // Update map view
-        const bounds = calculateBounds(kmlData);
-        if (bounds) {
-            map.fitBounds(bounds, { padding: 50 });
-        }
-        
-        // Display initial metric
-        if (currentMetric) {
-            displayMetric(currentMetric);
-        }
-    } catch (error) {
-        console.error(`Error loading city ${cityName}:`, error);
-    }
+    return cities;
 }
 
 function kmlToGeoJSON(kmlData) {
@@ -188,40 +221,179 @@ function kmlToGeoJSON(kmlData) {
     };
 }
 
-function updateMetricsList() {
-    const metricSelector = document.getElementById('metric-selector');
-    metricSelector.innerHTML = '';
+async function loadCity(cityName) {
+    currentCity = cityName;
     
-    // Get all available metrics from the KML that are in our config
-    const availableMetrics = new Set();
+    try {
+        // Remove existing schools layer first
+        if (map.getLayer(schoolsLayer)) {
+            map.removeLayer(schoolsLayer);
+        }
+        if (map.getSource('schools')) {
+            map.removeSource('schools');
+        }
+
+        // Load KML file
+        const response = await fetch(`data/KMLs/${cityName}.kml`);
+        const kmlText = await response.text();
+        const parser = new DOMParser();
+        kmlData = parser.parseFromString(kmlText, 'text/xml');
+        
+        // Convert to GeoJSON
+        const geojson = kmlToGeoJSON(kmlData);
+        
+        // Calculate bounds
+        const bounds = calculateBounds(kmlData);
+        map.fitBounds(bounds, { padding: 50 });
+        
+        // Remove existing layer and source if they exist
+        if (map.getLayer(currentLayer)) {
+            map.removeLayer(currentLayer);
+        }
+        if (map.getSource('demographics')) {
+            map.removeSource('demographics');
+        }
+        
+        // Add new source and layer for demographics
+        map.addSource('demographics', {
+            type: 'geojson',
+            data: geojson
+        });
+        
+        currentLayer = `${cityName}-layer`;
+        map.addLayer({
+            id: currentLayer,
+            type: 'fill',
+            source: 'demographics',
+            paint: {
+                'fill-color': '#fee5d9',
+                'fill-opacity': 0.7,
+                'fill-outline-color': '#ffffff'
+            }
+        });
+        
+        // Update metrics list and display current metric
+        updateMetricsList();
+        if (currentMetric) {
+            displayMetric(currentMetric);
+        }
+
+        // Now load schools after the KML layer is added
+        await loadSchools(cityName);
+        
+    } catch (error) {
+        console.error('Error loading city:', error);
+    }
+}
+
+async function loadSchools(cityName) {
+    try {
+        // Load all schools GeoJSON from data directory
+        const response = await fetch('data/schools.geojson');
+        if (!response.ok) {
+            console.warn('No schools data found');
+            return;
+        }
+
+        const schoolsData = await response.json();
+        
+        // Add schools source
+        map.addSource('schools', {
+            type: 'geojson',
+            data: schoolsData
+        });
+
+        // Add schools layer with bright orange dots and black stroke
+        map.addLayer({
+            id: schoolsLayer,
+            type: 'circle',
+            source: 'schools',
+            paint: {
+                'circle-radius': 7,
+                'circle-color': '#ff6b00',  // Bright orange
+                'circle-opacity': 1,
+                'circle-stroke-width': 2,
+                'circle-stroke-color': '#000000'  // Black outline
+            }
+        });
+
+        // Add popup for schools
+        const popup = new mapboxgl.Popup({
+            closeButton: false,
+            closeOnClick: false
+        });
+
+        map.on('mouseenter', schoolsLayer, (e) => {
+            map.getCanvas().style.cursor = 'pointer';
+            
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            const properties = e.features[0].properties;
+            
+            // Create popup content
+            const content = `
+                <strong>${properties.name}</strong><br>
+                Type: ${properties.type || 'N/A'}<br>
+                Tuition: $${properties.tuition ? properties.tuition.toLocaleString() : 'N/A'}<br>
+                Enrollment: ${properties.enrollment ? properties.enrollment.toLocaleString() : 'N/A'}
+            `;
+            
+            popup.setLngLat(coordinates)
+                .setHTML(content)
+                .addTo(map);
+        });
+
+        map.on('mouseleave', schoolsLayer, () => {
+            map.getCanvas().style.cursor = '';
+            popup.remove();
+        });
+
+        // Apply initial tuition filter
+        updateSchoolFilter();
+
+    } catch (error) {
+        console.error('Error loading schools:', error);
+    }
+}
+
+function updateMetricsList() {
+    const metricSelect = document.getElementById('metric-select');
+    if (!metricSelect) return;
+    
+    metricSelect.innerHTML = '';
+    
+    // Get metrics from KML data
+    const metrics = [];
     const placemarks = kmlData.getElementsByTagName('Placemark');
     if (placemarks.length > 0) {
         const dataElements = placemarks[0].getElementsByTagName('data');
         for (const elem of dataElements) {
-            const metricName = elem.getAttribute('name');
-            // Check if this metric is in our config
-            if (config.metrics.some(m => m.id === metricName)) {
-                availableMetrics.add(metricName);
+            const name = elem.getAttribute('name');
+            if (name && METRIC_CONFIG[name]) {
+                metrics.push(name);
             }
         }
     }
     
-    // Get configured metrics that are available in the data
-    const configuredMetrics = config.metrics.filter(m => availableMetrics.has(m.id));
-    
-    // Add options to selector
-    configuredMetrics.forEach(metric => {
-        const option = document.createElement('option');
-        option.value = metric.id;
-        option.textContent = metric.displayName;
-        option.title = metric.description; // Add tooltip with description
-        metricSelector.appendChild(option);
+    // Sort metrics by order
+    metrics.sort((a, b) => {
+        const orderA = METRIC_CONFIG[a].order || 999;
+        const orderB = METRIC_CONFIG[b].order || 999;
+        return orderA - orderB;
     });
     
-    // Select first metric by default
-    if (configuredMetrics.length > 0 && !currentMetric) {
-        currentMetric = configuredMetrics[0].id;
-        metricSelector.value = currentMetric;
+    // Add options to select
+    metrics.forEach(metric => {
+        const option = document.createElement('option');
+        option.value = metric;
+        option.textContent = METRIC_CONFIG[metric].displayName;
+        metricSelect.appendChild(option);
+    });
+    
+    // Select first metric by default if none selected
+    if (!currentMetric && metrics.length > 0) {
+        currentMetric = metrics[0];
+        metricSelect.value = currentMetric;
+        loadMetricRanges(currentMetric);
         displayMetric(currentMetric);
     }
 }
@@ -253,17 +425,15 @@ function calculateMetricStats(metric) {
         median: values[Math.floor(values.length / 2)]
     };
     
-    // Store stats for this metric
-    metricStats[metric] = stats;
+    // Store max value for this metric
+    metricMaxValues.set(metric, stats.max);
     
     return stats;
 }
 
 function loadMetricRanges(metric) {
-    const stats = metricStats[metric];
-    if (!stats) return [0, 100]; // Fallback if no stats available
-    
-    let min = 0, max = stats.max;
+    const config = METRIC_CONFIG[metric];
+    let min, max;
     
     // Check URL parameters first
     const params = new URLSearchParams(window.location.search);
@@ -273,59 +443,73 @@ function loadMetricRanges(metric) {
     } else if (customRanges.has(metric)) {
         // Then check custom ranges
         [min, max] = customRanges.get(metric);
+    } else {
+        // Fall back to defaults
+        min = config.defaultMin;
+        
+        // Use actual maximum if specified
+        if (config.useMaxAsDefault && metricMaxValues.has(metric)) {
+            max = metricMaxValues.get(metric);
+            console.log(`Using actual max for ${metric}: ${max}`); // Debug log
+        } else {
+            max = config.defaultMax || 100;
+            console.log(`Using default max for ${metric}: ${max}`); // Debug log
+        }
     }
     
-    // Update range inputs
+    // Update input fields
     document.getElementById('min-value').value = min;
     document.getElementById('max-value').value = max;
-    
-    return [min, max];
 }
 
 function saveMetricRanges(metric) {
     const min = parseFloat(document.getElementById('min-value').value);
     const max = parseFloat(document.getElementById('max-value').value);
     
-    // Store custom range
+    // Save to custom ranges
     customRanges.set(metric, [min, max]);
     
     // Update URL if different from defaults
-    const stats = metricStats[metric];
+    const config = METRIC_CONFIG[metric];
     const params = new URLSearchParams(window.location.search);
     const paramKey = `${metric}_range`;
     
-    // Only add to URL if different from defaults
-    const defaultMin = 0;
-    const defaultMax = stats?.max || 100;
+    const defaultMax = config.useMaxAsDefault && metricMaxValues.has(metric) 
+        ? metricMaxValues.get(metric) 
+        : (config.defaultMax || 100);
     
-    if (min !== defaultMin || max !== defaultMax) {
+    if (min !== config.defaultMin || max !== defaultMax) {
         params.set(paramKey, `${min},${max}`);
     } else {
         params.delete(paramKey);
     }
     
-    // Update URL without reloading
-    const newUrl = `${window.location.pathname}?${params.toString()}`;
-    window.history.replaceState({}, '', newUrl);
-    
-    // Update display
-    displayMetric(metric);
-    
-    return [min, max];
+    // Update URL without reloading the page
+    const newUrl = `${window.location.pathname}${params.toString() ? '?' + params.toString() : ''}`;
+    window.history.pushState({}, '', newUrl);
 }
 
-function displayMetric(metric) {
-    currentMetric = metric;
+function displayMetric(metricName) {
+    if (!map.getSource('demographics')) return;
+    
+    currentMetric = metricName;
     
     // Calculate stats first
-    const stats = calculateMetricStats(metric);
+    const stats = calculateMetricStats(metricName);
     if (!stats) return;
     
     // Update stats display
     updateStats(stats);
     
     // Now load ranges (which will use the calculated max)
-    loadMetricRanges(metric);
+    loadMetricRanges(metricName);
+    
+    // Save current schools layer state
+    let hasSchools = false;
+    if (map.getLayer(schoolsLayer)) {
+        hasSchools = true;
+        map.removeLayer(schoolsLayer);
+    }
     
     // Get current range values
     const minValue = parseFloat(document.getElementById('min-value').value);
@@ -337,7 +521,7 @@ function displayMetric(metric) {
     const mainRange = range * 0.8; // remaining 80% for main gradient
     const mainStep = mainRange / 5; // 5 steps for 6 colors in main gradient
     
-    // Calculate gradient points with debug logging
+    // Calculate gradient points
     const points = [
         [minValue, 'rgba(0, 0, 0, 0)'],        // transparent start
         [minValue + fadeRange, 'rgba(173, 216, 230, 0.6)'], // light blue
@@ -348,45 +532,35 @@ function displayMetric(metric) {
         [maxValue, 'rgba(128, 0, 128, 0.6)']   // deep violet
     ];
     
-    // Debug log the points
-    console.log('Gradient points:', points.map(p => p[0]));
+    // Update map layer colors
+    map.setPaintProperty(currentLayer, 'fill-color', [
+        'case',
+        ['<', ['get', metricName], minValue],
+        'rgba(0, 0, 0, 0)',  // transparent for values below minimum
+        ['interpolate',
+            ['linear'],
+            ['get', metricName],
+            ...points.flat() // Spread all points into the array
+        ]
+    ]);
     
-    // Verify points are in ascending order
-    for (let i = 1; i < points.length; i++) {
-        if (points[i][0] <= points[i-1][0]) {
-            console.error(`Invalid gradient point at index ${i}:`, points[i-1][0], points[i][0]);
-            return; // Prevent invalid layer creation
-        }
+    // Re-add schools layer if it existed
+    if (hasSchools) {
+        map.addLayer({
+            id: schoolsLayer,
+            type: 'circle',
+            source: 'schools',
+            paint: {
+                'circle-radius': 7,
+                'circle-color': '#ff6b00',  // Bright orange
+                'circle-opacity': 1,
+                'circle-stroke-width': 2,
+                'circle-stroke-color': '#000000'  // Black outline
+            }
+        });
     }
     
-    // Update map layer
-    const layerId = `${currentCity}-layer`;
-    if (map.getLayer(layerId)) {
-        map.removeLayer(layerId);
-    }
-    
-    // Add new layer with interpolated colors
-    map.addLayer({
-        id: layerId,
-        type: 'fill',
-        source: currentLayer,
-        paint: {
-            'fill-color': [
-                'case',
-                ['<', ['get', metric], minValue],
-                'rgba(0, 0, 0, 0)',  // transparent for values below minimum
-                ['interpolate',
-                    ['linear'],
-                    ['get', metric],
-                    ...points.flat() // Spread all points into the array
-                ]
-            ],
-            'fill-opacity': 1,
-            'fill-outline-color': '#ffffff'
-        }
-    });
-    
-    // Update gradient preview with the same colors
+    // Update gradient preview
     updateGradientPreview(minValue, maxValue, fadeRange);
 }
 
@@ -449,25 +623,32 @@ function calculateBounds(kmlData) {
 
 async function initControls() {
     // City selector
-    document.getElementById('city-selector').addEventListener('change', (e) => {
+    document.getElementById('city-selector')?.addEventListener('change', (e) => {
         loadCity(e.target.value);
     });
     
     // Metric selector
-    document.getElementById('metric-selector').addEventListener('change', (e) => {
+    document.getElementById('metric-select')?.addEventListener('change', (e) => {
         displayMetric(e.target.value);
     });
     
     // Range controls
-    document.getElementById('apply-range').addEventListener('click', () => {
+    document.getElementById('apply-range')?.addEventListener('click', () => {
         if (currentMetric) {
             saveMetricRanges(currentMetric);
             displayMetric(currentMetric);
         }
     });
     
+    // Comparison mode
+    document.getElementById('comparison-mode')?.addEventListener('change', () => {
+        if (currentMetric) {
+            displayMetric(currentMetric);
+        }
+    });
+    
     // Collapse button
-    document.getElementById('collapse-btn').addEventListener('click', () => {
+    document.getElementById('collapse-btn')?.addEventListener('click', () => {
         document.querySelector('.sidebar').classList.toggle('collapsed');
     });
     
@@ -480,6 +661,23 @@ async function initControls() {
             customRanges.set(metric, [min, max]);
         }
     }
+
+    // Add tuition filter listeners
+    document.getElementById('minTuition')?.addEventListener('change', updateSchoolFilter);
+    document.getElementById('maxTuition')?.addEventListener('change', updateSchoolFilter);
+}
+
+function updateSchoolFilter() {
+    const minTuition = parseFloat(document.getElementById('minTuition').value) || 0;
+    const maxTuition = parseFloat(document.getElementById('maxTuition').value) || Infinity;
+    
+    if (!map.getLayer(schoolsLayer)) return;
+    
+    map.setFilter(schoolsLayer, [
+        'all',
+        ['>=', ['get', 'tuition'], minTuition],
+        ['<=', ['get', 'tuition'], maxTuition]
+    ]);
 }
 
 // Initialize map when DOM is loaded
