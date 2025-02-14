@@ -258,6 +258,23 @@ function displayMetric(metric) {
     if (meanElement) meanElement.textContent = stats.mean.toLocaleString(undefined, {maximumFractionDigits: 2});
     if (medianElement) medianElement.textContent = stats.median.toLocaleString(undefined, {maximumFractionDigits: 2});
     
+    // Update min/max input values
+    const minInput = document.getElementById('min-value');
+    const maxInput = document.getElementById('max-value');
+    if (minInput) minInput.value = Math.floor(stats.min);
+    if (maxInput) maxInput.value = Math.ceil(stats.max);
+    
+    // Update color gradient preview
+    const gradientPreview = document.querySelector('.gradient-preview');
+    if (gradientPreview) {
+        const colorScale = config.heatmap.colors;
+        const gradientColors = colorScale.map((color, index) => {
+            const percent = (index / (colorScale.length - 1)) * 100;
+            return `${color} ${percent}%`;
+        }).join(', ');
+        gradientPreview.style.background = `linear-gradient(to right, ${gradientColors})`;
+    }
+    
     // Create color scale
     const colorScale = config.heatmap.colors;
     const steps = [];
@@ -277,6 +294,33 @@ function displayMetric(metric) {
         ...steps
     ]);
 }
+
+// Add event listener for the apply range button
+document.getElementById('apply-range')?.addEventListener('click', () => {
+    const minValue = parseFloat(document.getElementById('min-value').value);
+    const maxValue = parseFloat(document.getElementById('max-value').value);
+    const currentMetric = document.getElementById('metric-select').value;
+    
+    if (!isNaN(minValue) && !isNaN(maxValue) && currentMetric) {
+        const colorScale = config.heatmap.colors;
+        const steps = [];
+        
+        // Create color stops with custom min/max
+        for (let i = 0; i < colorScale.length; i++) {
+            const value = minValue + (i / (colorScale.length - 1)) * (maxValue - minValue);
+            steps.push(value);
+            steps.push(colorScale[i]);
+        }
+        
+        // Update layer style
+        map.setPaintProperty(currentLayer, 'fill-color', [
+            'interpolate',
+            ['linear'],
+            ['get', currentMetric],
+            ...steps
+        ]);
+    }
+});
 
 // Initialize on page load
 document.addEventListener('DOMContentLoaded', initMap);

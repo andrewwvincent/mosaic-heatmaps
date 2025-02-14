@@ -178,7 +178,7 @@ const config = {
         "Average (Mean) Travel Time: Worked Away from Home": {
             basis: "time"
         },
-        "Average Elementary and high school tuitions": {
+        "Average Elementary and high school tuition": {
             basis: "tuition"
         },
         "Average (Mean) Household Size": {
@@ -187,7 +187,7 @@ const config = {
         "Average (Mean) Household Income": {
             basis: "household_income"
         },
-        "Mdian Household Income": {
+        "Median Household Income": {
             basis: "household_income"
         }
         // You can add more metrics here with their basis values
