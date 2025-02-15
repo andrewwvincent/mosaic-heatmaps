@@ -29,12 +29,14 @@ function initControls() {
     citySelector.innerHTML = '';
     
     // Add cities to selector
-    Object.entries(config.cities).forEach(([id, city]) => {
-        const option = document.createElement('option');
-        option.value = id;
-        option.textContent = city.name;
-        citySelector.appendChild(option);
-    });
+    Object.entries(config.cities)
+        .sort(([, a], [, b]) => a.name.localeCompare(b.name))
+        .forEach(([id, city]) => {
+            const option = document.createElement('option');
+            option.value = id;
+            option.textContent = city.name;
+            citySelector.appendChild(option);
+        });
     
     // Event listeners
     citySelector.addEventListener('change', (e) => {
@@ -77,21 +79,7 @@ async function loadCity(cityId) {
         const geojson = kmlToGeoJSON(kmlData);
         
         // Add source and layer
-        map.addSource(cityId, {
-            type: 'geojson',
-            data: geojson
-        });
-        
-        map.addLayer({
-            id: cityId,
-            type: 'fill',
-            source: cityId,
-            paint: {
-                'fill-opacity': config.heatmap.defaultOpacity
-            }
-        });
-        
-        currentLayer = cityId;
+        addGeoJSONLayer(geojson, cityId);
         
         // Update map view
         map.flyTo({
@@ -107,37 +95,100 @@ async function loadCity(cityId) {
     }
 }
 
+function addGeoJSONLayer(geojson, layerId) {
+    // Remove existing layer if it exists
+    if (map.getLayer(layerId)) {
+        map.removeLayer(layerId);
+    }
+    if (map.getSource(layerId)) {
+        map.removeSource(layerId);
+    }
+    
+    // Add the GeoJSON source
+    map.addSource(layerId, {
+        type: 'geojson',
+        data: geojson
+    });
+    
+    // Add the layer
+    map.addLayer({
+        id: layerId,
+        type: 'fill',
+        source: layerId,
+        paint: {
+            'fill-opacity': 1,
+            'fill-outline-color': 'rgba(0,0,0,0)' // transparent outline
+        }
+    });
+    
+    currentLayer = layerId;
+    
+    // Update metrics list and display first metric
+    updateMetricsList();
+}
+
 async function loadSchools() {
     try {
         const response = await fetch(config.schools.source);
-        const data = await response.json();
+        const geojson = await response.json();
         
-        if (map.getSource('schools')) {
-            map.removeLayer(schoolsLayer);
-            map.removeSource('schools');
-        }
-        
+        // Add source
         map.addSource('schools', {
             type: 'geojson',
-            data: data
+            data: geojson
         });
         
+        // Add circle layer for schools
         map.addLayer({
             id: schoolsLayer,
             type: 'circle',
             source: 'schools',
-            paint: config.schools.layer.paint,
-            filter: ['>=', ['get', 'tuition'], config.schools.defaultMinTuition]
+            paint: {
+                'circle-radius': 6,
+                'circle-color': '#ff0000',
+                'circle-stroke-width': 2,
+                'circle-stroke-color': '#000000'
+            },
+            filter: ['all', 
+                ['has', 'tuition'],  // Must have tuition value
+                ['>=', ['get', 'tuition'], 30000]  // Must meet minimum threshold
+            ]
+        });
+        
+        // Add click event for school points
+        map.on('click', schoolsLayer, (e) => {
+            const coordinates = e.features[0].geometry.coordinates.slice();
+            const properties = e.features[0].properties;
+            
+            while (Math.abs(e.lngLat.lng - coordinates[0]) > 180) {
+                coordinates[0] += e.lngLat.lng > coordinates[0] ? 360 : -360;
+            }
+            
+            new mapboxgl.Popup()
+                .setLngLat(coordinates)
+                .setHTML(`
+                    <h3>${properties.name}</h3>
+                    <p>Tuition: $${properties.tuition.toLocaleString()}</p>
+                `)
+                .addTo(map);
+        });
+        
+        // Change cursor on hover
+        map.on('mouseenter', schoolsLayer, () => {
+            map.getCanvas().style.cursor = 'pointer';
+        });
+        map.on('mouseleave', schoolsLayer, () => {
+            map.getCanvas().style.cursor = '';
         });
         
     } catch (error) {
-        console.warn('Error loading schools:', error);
+        console.error('Error loading schools:', error);
     }
 }
 
 function filterSchools() {
     const minTuition = parseFloat(document.getElementById('minTuition').value) || 0;
-    map.setFilter(schoolsLayer, ['>=', ['get', 'tuition'], minTuition]);
+    map.setFilter(schoolsLayer, ['all', ['has', 'tuition'], ['>=', ['get', 'tuition'], minTuition]]);
 }
 
 function kmlToGeoJSON(kmlData) {
@@ -264,8 +315,9 @@ function displayMetric(metric) {
     if (minInput) minInput.value = Math.floor(stats.min);
     if (maxInput) maxInput.value = Math.ceil(stats.max);
     
-    // Update color gradient preview
+    // Update color gradient preview and add median label
     const gradientPreview = document.querySelector('.gradient-preview');
+    const medianLabel = document.querySelector('.gradient-median');
     if (gradientPreview) {
         const colorScale = config.heatmap.colors;
         const gradientColors = colorScale.map((color, index) => {
@@ -273,6 +325,13 @@ function displayMetric(metric) {
             return `${color} ${percent}%`;
         }).join(', ');
         gradientPreview.style.background = `linear-gradient(to right, ${gradientColors})`;
+        
+        // Update median label position and value
+        if (medianLabel) {
+            const medianPercent = ((stats.median - stats.min) / (stats.max - stats.min)) * 100;
+            medianLabel.style.left = `${medianPercent}%`;
+            medianLabel.textContent = stats.median.toLocaleString(undefined, {maximumFractionDigits: 2});
+        }
     }
     
     // Create color scale

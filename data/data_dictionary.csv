@@ -1,50 +1,50 @@
-﻿ID,Name
-CYA01V001,Total Population
-CYB02V001,Total Households
-CYB03V001,Total Families
-CYB26VV01,Average (Mean) Household Size
-DP01V008,Population aged 16 and under (Children)
-DP01V009,Student population: Pre-K to 8th grade
-DP01V010,Student population: 9th to 12th grade
-CX02V161,Elementary and high school tuition
-XCX02V161,Average Elementary and high school tuition
-CYA04V001,Age 0-4
-CYA04V002,Age 5-9
-CYA04V003,Age 10-14
-CYA04V004,Age 15-17
-CDA04V001,% Age 0-4
-CDA04V002,% Age 5-9
-CDA04V003,% Age 10-14
-CDA04V004,% Age 15-17
-CYC01V017,Household Income $250k-$500k
-CYC01V018,Household Income $500k+
-XCYC01V017,% Household Income $250k-$500k
-XCYC01V018,% Household Income $500k+
-CYEC14V001,Average (Mean) Household Income
-CYEC17V001,Median Household Income
-MOSHHBS,Households (Mosaic Data)
-MOSHHGPA,A - Power Elite
-MOSHHGPB,B - Flourishing Families
-XMOSHHGPA,% A - Power Elite
-XMOSHHGPB,% B - Flourishing Families
-MOSHHA01,A01 - American Royalty
-MOSHHA02,A02 - Platinum Prosperity
-MOSHHA03,A03 - Kids and Cebernet
-MOSHHA04,A04 - Picture Perfect Families
-MOSHHA05,A05 - Couples and Clout
-MOSHHA06,A06 - Jet Set Urbanites
-MOSHHB07,B07 - Across the Ages
-MOSHHB08,B08 - Babies and Bliss
-MOSHHB09,B09 - Family Fun-tastic
-MOSHHB10,B10 - Cosmopolitan Achievers
-XMOSHHA01,% A01 - American Royalty
-XMOSHHA02,% A02 - Platinum Prosperity
-XMOSHHA03,% A03 - Kids and Cebernet
-XMOSHHA04,% A04 - Picture Perfect Families
-XMOSHHA05,% A05 - Couples and Clout
-XMOSHHA06,% A06 - Jet Set Urbanites
-XMOSHHB07,% B07 - Across the Ages
-XMOSHHB08,% B08 - Babies and Bliss
-XMOSHHB09,% B09 - Family Fun-tastic
-XMOSHHB10,% B10 - Cosmopolitan Achievers
-CYED12V001,Average (Mean) Travel Time: Worked Away from Home
+﻿ID,Name,,,,,,,,,,,
+CYA01V001,Total Population,,,,,,,,,,,
+CYB02V001,Total Households,,,,,,,,,,,
+CYB03V001,Total Families,,,,,,,,,,,
+CYB26VV01,Average (Mean) Household Size,,,,,,,,,,,
+DP01V008,Population aged 16 and under (Children),,,,,,,,,,,
+DP01V009,Student population: Pre-K to 8th grade,,,,,,,,,,,
+DP01V010,Student population: 9th to 12th grade,,,,,,,,,,,
+CX02V161,Elementary and high school tuition,,,,,,,,,,,
+XCX02V161,Average Elementary and high school tuition,,,,,,,,,,,
+CYA04V001,Age 0-4,,,,,,,,,,,
+CYA04V002,Age 5-9,,,,,,,,,,,
+CYA04V003,Age 10-14,,,,,,,,,,,
+CYA04V004,Age 15-17,,,,,,,,,,,
+CDA04V001,% Age 0-4,,,,,,,,,,,
+CDA04V002,% Age 5-9,,,,,,,,,,,
+CDA04V003,% Age 10-14,,,,,,,,,,,
+CDA04V004,% Age 15-17,,,,,,,,,,,
+CYC01V017,Household Income $250k-$500k,,,,,,,,,,,
+CYC01V018,Household Income $500k+,,,,,,,,,,,
+XCYC01V017,% Household Income $250k-$500k,,,,,,,,,,,9138.271605
+XCYC01V018,% Household Income $500k+,,,,,,,,,,,
+CYEC14V001,Average (Mean) Household Income,,,,,,,,,,,
+CYEC17V001,Median Household Income,,,,,,,,,,,
+MOSHHBS,Households (Mosaic Data),,,,,,,,,,,
+MOSHHGPA,A - Power Elite,,,,,,,,,,,
+MOSHHGPB,B - Flourishing Families,,,,,,,,,,,
+XMOSHHGPA,% A - Power Elite,,,,,,,,,,,
+XMOSHHGPB,% B - Flourishing Families,,,,,,,,,,,
+MOSHHA01,A01 - American Royalty,,,,,,,,,,,
+MOSHHA02,A02 - Platinum Prosperity,,,,,,,,,,,
+MOSHHA03,A03 - Kids and Cabernet,,,,,,,,,,,
+MOSHHA04,A04 - Picture Perfect Families,,,,,,,,,,,
+MOSHHA05,A05 - Couples with Clout,,,,,,,,,,,
+MOSHHA06,A06 - Jet Set Urbanites,,,,,,,,,,,
+MOSHHB07,B07 - Across the Ages,,,,,,,,,,,
+MOSHHB08,B08 - Babies and Bliss,,,,,,,,,,,
+MOSHHB09,B09 - Family Fun-tastic,,,,,,,,,,,
+MOSHHB10,B10 - Cosmopolitan Achievers,,,,,,,,,,,
+XMOSHHA01,% A01 - American Royalty,,,,,,,,,,,
+XMOSHHA02,% A02 - Platinum Prosperity,,,,,,,,,,,
+XMOSHHA03,% A03 - Kids and Cebernet,,,,,,,,,,,
+XMOSHHA04,% A04 - Picture Perfect Families,,,,,,,,,,,
+XMOSHHA05,% A05 - Couples and Clout,,,,,,,,,,,
+XMOSHHA06,% A06 - Jet Set Urbanites,,,,,,,,,,,
+XMOSHHB07,% B07 - Across the Ages,,,,,,,,,,,
+XMOSHHB08,% B08 - Babies and Bliss,,,,,,,,,,,
+XMOSHHB09,% B09 - Family Fun-tastic,,,,,,,,,,,
+XMOSHHB10,% B10 - Cosmopolitan Achievers,,,,,,,,,,,
+CYED12V001,Average (Mean) Travel Time: Worked Away from Home,,,,,,,,,,,
